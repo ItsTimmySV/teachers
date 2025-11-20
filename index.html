@@ -373,93 +373,6 @@
     .hidden {
       display: none !important;
     }
-
-    /* ================== MOBILE (pantallas pequeñas) ================== */
-    @media (max-width: 600px) {
-      body {
-        padding: 8px;
-      }
-
-      .container {
-        padding: 12px 10px 16px;
-        border-radius: 16px;
-        box-shadow: 0 12px 24px rgba(0,0,0,0.5);
-      }
-
-      header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-      }
-
-      h1 {
-        font-size: 1.1rem;
-      }
-
-      .subtitle {
-        font-size: 0.75rem;
-      }
-
-      #btnClearAll {
-        align-self: stretch;
-        justify-content: center;
-        width: 100%;
-      }
-
-      .form-row {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .btn-group {
-        width: 100%;
-      }
-
-      .btn-group button {
-        flex: 1;
-        justify-content: center;
-      }
-
-      .status-bar {
-        flex-direction: column;
-        align-items: flex-start;
-        border-radius: 12px;
-      }
-
-      .status-bar .subtitle {
-        width: 100%;
-      }
-
-      .card {
-        padding: 8px 8px 10px;
-      }
-
-      .marks-table-wrapper {
-        max-height: 220px;
-      }
-
-      table {
-        font-size: 0.7rem;
-      }
-
-      th, td {
-        padding: 5px 6px;
-      }
-
-      .small-label {
-        font-size: 0.72rem;
-      }
-    }
-
-    @media (max-width: 400px) {
-      h1 {
-        font-size: 1rem;
-      }
-      .photo-thumb {
-        width: 32px;
-        height: 24px;
-      }
-    }
   </style>
 </head>
 <body>
@@ -635,6 +548,11 @@
       localStorage.setItem("teacherMarks", JSON.stringify(marks));
     }
 
+    // 🔗 Construir URL de Google Maps a partir de lat/lng
+    function buildMapsUrl(lat, lng) {
+      return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+    }
+
     function refreshTable() {
       const marks = getMarks();
       marksBody.innerHTML = "";
@@ -661,7 +579,9 @@
 
         const tdLocation = document.createElement("td");
         if (mark.lat != null && mark.lng != null) {
+          const mapsUrl = buildMapsUrl(mark.lat, mark.lng);
           tdLocation.innerHTML =
+            `<a href="${mapsUrl}" target="_blank" rel="noopener noreferrer">Ver en Maps</a><br>` +
             `${mark.lat.toFixed(5)}, ${mark.lng.toFixed(5)}<br>` +
             `<span style="opacity:0.7;">±${mark.accuracy || "?"}m</span>`;
         } else {
@@ -836,6 +756,10 @@
       setStatus("Marca guardada localmente.", {
         mini: "Puedes limpiar el historial con el botón de la esquina superior derecha.",
       });
+
+      // 🚩 Aquí más adelante podríamos hacer un fetch()
+      // a tu backend Node+whatsapp-web.js para enviar
+      // el mensaje en automático.
     });
 
     document.getElementById("btnRetake").addEventListener("click", () => {
