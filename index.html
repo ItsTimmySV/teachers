@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Control de Asistencia Docentes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.1);
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --danger: #f97373;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, #1f2937 0, #020617 55%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 960px;
+      background: linear-gradient(135deg, rgba(148,163,184,0.1), rgba(15,23,42,0.9));
+      border-radius: 24px;
+      padding: 20px 20px 24px;
+      box-shadow: 0 20px 45px rgba(0,0,0,0.6);
+      border: 1px solid rgba(148,163,184,0.35);
+      backdrop-filter: blur(10px);
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    h1 span.logo {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 0%, #38bdf8, #0ea5e9 55%, #0369a1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 16px rgba(56,189,248,0.7);
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .subtitle {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+
+    .form-group {
+      flex: 1;
+      min-width: 180px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 3px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.7);
+      background: rgba(15,23,42,0.75);
+      color: var(--text);
+      outline: none;
+      font-size: 0.9rem;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(56,189,248,0.35);
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    button {
+      border: none;
+      cursor: pointer;
+      font-size: 0.85rem;
+      border-radius: 999px;
+      padding: 8px 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.15s ease;
+      white-space: nowrap;
+    }
+
+    button span.icon {
+      font-size: 1rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+      color: #0b1120;
+      font-weight: 600;
+      box-shadow: 0 8px 18px rgba(56,189,248,0.45);
+    }
+
+    .btn-secondary {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid rgba(56,189,248,0.4);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px dashed rgba(148,163,184,0.5);
+    }
+
+    button:active {
+      transform: scale(0.97);
+      box-shadow: none;
+    }
+
+    .status-bar {
+      font-size: 0.8rem;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.85);
+      border: 1px solid rgba(148,163,184,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .status-text {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 10px rgba(34,197,94,0.7);
+    }
+
+    .status-warning {
+      background: rgba(248,113,113,0.1);
+      border-color: rgba(248,113,113,0.5);
+      color: #fecaca;
+    }
+
+    .status-warning .status-dot {
+      background: var(--danger);
+      box-shadow: 0 0 10px rgba(248,113,113,0.7);
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.7fr);
+      gap: 14px;
+    }
+
+    @media (max-width: 800px) {
+      .main-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .card {
+      background: rgba(15,23,42,0.9);
+      border-radius: 16px;
+      padding: 10px 12px 12px;
+      border: 1px solid rgba(148,163,184,0.4);
+      min-height: 0;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      gap: 6px;
+    }
+
+    .card-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(56,189,248,0.1);
+      color: var(--accent);
+      border: 1px solid rgba(56,189,248,0.6);
+    }
+
+    .video-wrapper {
+      position: relative;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #020617;
+      border: 1px solid rgba(148,163,184,0.5);
+      aspect-ratio: 4 / 3;
+    }
+
+    video, canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .video-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 8px;
+      background: linear-gradient(to top, rgba(0,0,0,0.6), transparent 40%);
+      font-size: 0.75rem;
+    }
+
+    .badge {
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(148,163,184,0.6);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .small-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .marks-table-wrapper {
+      max-height: 320px;
+      overflow: auto;
+      border-radius: 10px;
+      border: 1px solid rgba(30,41,59,0.9);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+      background: rgba(15,23,42,0.95);
+    }
+
+    thead {
+      position: sticky;
+      top: 0;
+      background: rgba(15,23,42,0.98);
+      z-index: 1;
+    }
+
+    th, td {
+      padding: 6px 8px;
+      border-bottom: 1px solid rgba(30,41,59,0.85);
+      text-align: left;
+    }
+
+    th {
+      font-weight: 600;
+      color: #9ca3af;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .photo-thumb {
+      width: 40px;
+      height: 28px;
+      border-radius: 6px;
+      object-fit: cover;
+      border: 1px solid rgba(148,163,184,0.7);
+    }
+
+    .tag {
+      display: inline-flex;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .tag-entrada {
+      background: rgba(34,197,94,0.12);
+      color: #bbf7d0;
+      border: 1px solid rgba(34,197,94,0.7);
+    }
+
+    .tag-salida {
+      background: rgba(248,113,113,0.10);
+      color: #fecaca;
+      border: 1px solid rgba(248,113,113,0.7);
+    }
+
+    .pill-muted {
+      background: rgba(15,23,42,0.8);
+      border-color: rgba(148,163,184,0.6);
+      color: var(--muted);
+    }
+
+    .footer-text {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 8px;
+      text-align: right;
+    }
+
+    .danger-text {
+      color: #fecaca;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>
+          <span class="logo">A</span>
+          Control de Asistencia
+        </h1>
+        <div class="subtitle">
+          Prototipo local — marca entrada/salida con foto y ubicación.
+        </div>
+      </div>
+      <button class="btn-ghost" id="btnClearAll">
+        <span class="icon">🧹</span> Limpiar historial
+      </button>
+    </header>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="teacherName">Nombre del docente</label>
+        <input id="teacherName" type="text" placeholder="Ej. Karen Arias" />
+      </div>
+      <div class="btn-group">
+        <button class="btn-primary" id="btnEntrada">
+          <span class="icon">🟢</span> Marcar entrada
+        </button>
+        <button class="btn-secondary" id="btnSalida">
+          <span class="icon">🔴</span> Marcar salida
+        </button>
+      </div>
+    </div>
+
+    <div class="status-bar" id="statusBar">
+      <div class="status-text">
+        <span class="status-dot"></span>
+        <span id="statusMessage">Listo para marcar asistencia.</span>
+      </div>
+      <span id="statusMini" class="subtitle">Permitir acceso a cámara y ubicación cuando se solicite.</span>
+    </div>
+
+    <div class="main-grid">
+      <!-- LADO IZQUIERDO: CÁMARA -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">
+            📷 Captura en tiempo real
+          </div>
+          <span class="pill pill-muted" id="currentModePill">Modo: —</span>
+        </div>
+        <div class="video-wrapper">
+          <video id="video" autoplay playsinline muted></video>
+          <canvas id="canvas" class="hidden"></canvas>
+          <div class="video-overlay">
+            <div class="badge">
+              <span>Ubicación:</span>
+              <span id="locationText">—</span>
+            </div>
+            <div class="badge">
+              <span id="timeText">--:--</span>
+            </div>
+          </div>
+        </div>
+        <div class="small-label">
+          1. Toca <strong>Marcar entrada/salida</strong> · 2. Se pedirá permiso de ubicación/cámara · 3. Pulsa “Guardar marca”.
+        </div>
+        <div style="margin-top: 8px; display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn-primary" id="btnSaveMark">
+            <span class="icon">💾</span> Guardar marca
+          </button>
+          <button class="btn-ghost" id="btnRetake">
+            <span class="icon">🔄</span> Reintentar foto
+          </button>
+        </div>
+        <div class="small-label danger-text">
+          Nota: Este prototipo guarda todo en <strong>localStorage</strong> del navegador (solo este dispositivo).
+        </div>
+      </section>
+
+      <!-- LADO DERECHO: HISTORIAL -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">
+            📊 Historial de marcas
+          </div>
+          <span class="pill" id="countPill">0 registros</span>
+        </div>
+        <div class="marks-table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Docente</th>
+                <th>Tipo</th>
+                <th>Fecha y hora</th>
+                <th>Ubicación</th>
+                <th>Foto</th>
+              </tr>
+            </thead>
+            <tbody id="marksBody">
+              <!-- Registros aquí -->
+            </tbody>
+          </table>
+        </div>
+        <div class="footer-text">
+          Futuro: enviar estos datos a un backend (Node.js) y vincularlo con un bot de WhatsApp.
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // ================== VARIABLES GLOBALES ==================
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const statusBar = document.getElementById("statusBar");
+    const statusMessage = document.getElementById("statusMessage");
+    const statusMini = document.getElementById("statusMini");
+    const locationText = document.getElementById("locationText");
+    const timeText = document.getElementById("timeText");
+    const currentModePill = document.getElementById("currentModePill");
+    const marksBody = document.getElementById("marksBody");
+    const countPill = document.getElementById("countPill");
+    const teacherNameInput = document.getElementById("teacherName");
+
+    let currentMode = null; // "entrada" | "salida"
+    let lastPosition = null;
+    let lastPhotoDataUrl = null;
+    let mediaStream = null;
+
+    // ================== UTILIDADES ==================
+    function setStatus(msg, opts = {}) {
+      statusMessage.textContent = msg;
+      if (opts.warning) {
+        statusBar.classList.add("status-warning");
+      } else {
+        statusBar.classList.remove("status-warning");
+      }
+      if (opts.mini) {
+        statusMini.textContent = opts.mini;
+      }
+    }
+
+    function updateTime() {
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mm = String(now.getMinutes()).padStart(2, "0");
+      timeText.textContent = `${hh}:${mm}`;
+    }
+    setInterval(updateTime, 1000);
+    updateTime();
+
+    function updateModePill() {
+      if (!currentMode) {
+        currentModePill.textContent = "Modo: —";
+        return;
+      }
+      currentModePill.textContent =
+        "Modo: " + (currentMode === "entrada" ? "ENTRADA" : "SALIDA");
+    }
+
+    function getMarks() {
+      try {
+        const raw = localStorage.getItem("teacherMarks") || "[]";
+        return JSON.parse(raw);
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveMarks(marks) {
+      localStorage.setItem("teacherMarks", JSON.stringify(marks));
+    }
+
+    function refreshTable() {
+      const marks = getMarks();
+      marksBody.innerHTML = "";
+      for (const mark of marks) {
+        const tr = document.createElement("tr");
+
+        const tdTeacher = document.createElement("td");
+        tdTeacher.textContent = mark.teacher || "—";
+
+        const tdType = document.createElement("td");
+        const spanTag = document.createElement("span");
+        spanTag.classList.add("tag");
+        if (mark.type === "entrada") {
+          spanTag.classList.add("tag-entrada");
+          spanTag.textContent = "ENTRADA";
+        } else {
+          spanTag.classList.add("tag-salida");
+          spanTag.textContent = "SALIDA";
+        }
+        tdType.appendChild(spanTag);
+
+        const tdDate = document.createElement("td");
+        tdDate.textContent = new Date(mark.timestamp).toLocaleString();
+
+        const tdLocation = document.createElement("td");
+        if (mark.lat != null && mark.lng != null) {
+          tdLocation.innerHTML =
+            `${mark.lat.toFixed(5)}, ${mark.lng.toFixed(5)}<br>` +
+            `<span style="opacity:0.7;">±${mark.accuracy || "?"}m</span>`;
+        } else {
+          tdLocation.textContent = "—";
+        }
+
+        const tdPhoto = document.createElement("td");
+        if (mark.photo) {
+          const img = document.createElement("img");
+          img.src = mark.photo;
+          img.className = "photo-thumb";
+          tdPhoto.appendChild(img);
+        } else {
+          tdPhoto.textContent = "—";
+        }
+
+        tr.appendChild(tdTeacher);
+        tr.appendChild(tdType);
+        tr.appendChild(tdDate);
+        tr.appendChild(tdLocation);
+        tr.appendChild(tdPhoto);
+
+        marksBody.appendChild(tr);
+      }
+      countPill.textContent =
+        marks.length === 1 ? "1 registro" : `${marks.length} registros`;
+    }
+
+    function stopCamera() {
+      if (mediaStream) {
+        mediaStream.getTracks().forEach((t) => t.stop());
+        mediaStream = null;
+      }
+    }
+
+    async function startCamera() {
+      try {
+        stopCamera();
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "user" },
+          audio: false,
+        });
+        video.srcObject = mediaStream;
+        video.classList.remove("hidden");
+        canvas.classList.add("hidden");
+        lastPhotoDataUrl = null;
+      } catch (err) {
+        console.error("Error al activar cámara", err);
+        setStatus("No se pudo acceder a la cámara.", {
+          warning: true,
+          mini: "Revisa permisos del navegador o prueba en otro dispositivo.",
+        });
+      }
+    }
+
+    function takeSnapshot() {
+      if (!video.videoWidth || !video.videoHeight) {
+        setStatus("La cámara aún no está lista para capturar.", {
+          warning: true,
+        });
+        return;
+      }
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      lastPhotoDataUrl = canvas.toDataURL("image/jpeg", 0.8);
+      canvas.classList.remove("hidden");
+      video.classList.add("hidden");
+    }
+
+    function ensureSnapshotBeforeSave() {
+      if (!lastPhotoDataUrl) {
+        takeSnapshot();
+      }
+    }
+
+    function requestLocation() {
+      if (!navigator.geolocation) {
+        setStatus("Este navegador no soporta geolocalización.", {
+          warning: true,
+          mini: "Prueba en un teléfono o navegador más reciente.",
+        });
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          lastPosition = pos.coords;
+          locationText.textContent = `${pos.coords.latitude.toFixed(
+            5
+          )}, ${pos.coords.longitude.toFixed(5)}`;
+          setStatus("Ubicación obtenida correctamente.");
+        },
+        (err) => {
+          console.warn("Error geoloc:", err);
+          setStatus("No se pudo obtener la ubicación.", {
+            warning: true,
+            mini: "Si no permites ubicación, la marca se guardará sin GPS.",
+          });
+          locationText.textContent = "—";
+          lastPosition = null;
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    }
+
+    // ================== EVENTOS DE UI ==================
+    document.getElementById("btnEntrada").addEventListener("click", () => {
+      const teacher = teacherNameInput.value.trim();
+      if (!teacher) {
+        setStatus("Escribe el nombre del docente antes de marcar.", {
+          warning: true,
+        });
+        teacherNameInput.focus();
+        return;
+      }
+      currentMode = "entrada";
+      updateModePill();
+      setStatus("Modo ENTRADA: obteniendo ubicación y activando cámara...");
+      requestLocation();
+      startCamera();
+    });
+
+    document.getElementById("btnSalida").addEventListener("click", () => {
+      const teacher = teacherNameInput.value.trim();
+      if (!teacher) {
+        setStatus("Escribe el nombre del docente antes de marcar.", {
+          warning: true,
+        });
+        teacherNameInput.focus();
+        return;
+      }
+      currentMode = "salida";
+      updateModePill();
+      setStatus("Modo SALIDA: obteniendo ubicación y activando cámara...");
+      requestLocation();
+      startCamera();
+    });
+
+    document.getElementById("btnSaveMark").addEventListener("click", () => {
+      const teacher = teacherNameInput.value.trim();
+      if (!teacher) {
+        setStatus("Escribe el nombre del docente antes de guardar.", {
+          warning: true,
+        });
+        teacherNameInput.focus();
+        return;
+      }
+      if (!currentMode) {
+        setStatus("Primero selecciona ENTRADA o SALIDA.", {
+          warning: true,
+        });
+        return;
+      }
+
+      ensureSnapshotBeforeSave();
+
+      const marks = getMarks();
+      const mark = {
+        id: Date.now(),
+        teacher,
+        type: currentMode,
+        timestamp: new Date().toISOString(),
+        lat: lastPosition ? lastPosition.latitude : null,
+        lng: lastPosition ? lastPosition.longitude : null,
+        accuracy: lastPosition ? lastPosition.accuracy : null,
+        photo: lastPhotoDataUrl,
+      };
+      marks.push(mark);
+      saveMarks(marks);
+      refreshTable();
+
+      setStatus("Marca guardada localmente.", {
+        mini: "Puedes limpiar el historial con el botón de la esquina superior derecha.",
+      });
+    });
+
+    document.getElementById("btnRetake").addEventListener("click", () => {
+      if (!currentMode) {
+        setStatus("Primero selecciona ENTRADA o SALIDA.", {
+          warning: true,
+        });
+        return;
+      }
+      startCamera();
+      setStatus("Cámara lista para una nueva captura.");
+    });
+
+    document.getElementById("btnClearAll").addEventListener("click", () => {
+      if (!confirm("¿Seguro que quieres borrar todo el historial local?")) return;
+      localStorage.removeItem("teacherMarks");
+      refreshTable();
+      setStatus("Historial borrado.");
+    });
+
+    // ================== INICIALIZACIÓN ==================
+    window.addEventListener("beforeunload", () => {
+      stopCamera();
+    });
+
+    // Cargar historial al abrir
+    refreshTable();
+    updateModePill();
+    setStatus("Listo para marcar asistencia.");
+  </script>
+</body>
+</html>
